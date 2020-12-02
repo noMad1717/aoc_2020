@@ -1,25 +1,54 @@
 """
     Advent of Code 2020 - Day 2
 """
-import re
+pwds = []
+with open('input') as inputFile:
+    for line in inputFile:
+        line.strip()
+        pwds.append(line)
 
-def buildRegexp(val):
-    parts = val.split()
-    return '%s{%s}' % (parts[1], parts[0].replace("-", ","))
+def parseRules(string):
+    parts = string.split()
+    boundsParts = parts[0].split("-")
+    return [parts[1], boundsParts[0], boundsParts[1]]
+
+def checkOccurrences(string, char, lowerBound, upperBound):
+    occurrences = string.count(char)
+    return occurrences >= lowerBound and occurrences <= upperBound
+
+def checkPosition(string, char, firstIndex, lastIndex):
+    firstMatches = string[firstIndex] == char
+    secondMatches = string[lastIndex] == char
+    return (firstMatches and not secondMatches) or (not firstMatches and secondMatches)
 
 def partOne(passwords):
-    print(passwords)
     matches = 0
     for pwd in passwords:
         parts = pwd.split(": ")
-        pattern = buildRegexp(parts[0])
-        print(pattern + ", " + parts[1])
-        result = re.match(pattern, parts[1])
-        if result != None:
-            print('Match!')
+        password = parts[1].strip()
+        rules = parseRules(parts[0])
+        char = rules[0]
+        lower = int(rules[1])
+        upper = int(rules[2])
+        result = checkOccurrences(password, char, lower, upper)
+        if (result == True):
             matches = matches + 1
     return matches
 
 def partTwo(passwords):
-    print('hello2')
+    matches = 0
+    for pwd in passwords:
+        parts = pwd.split(": ")
+        password = parts[1].strip()
+        rules = parseRules(parts[0])
+        char = rules[0]
+        lower = int(rules[1]) - 1
+        upper = int(rules[2]) - 1
+        result = checkPosition(password, char, lower, upper)
+        if (result == True):
+            matches = matches + 1
+    return matches
+
+print(str(partOne(pwds)) + " matches!")
+print(str(partTwo(pwds)) + " matches!")
 
