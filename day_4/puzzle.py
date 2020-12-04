@@ -15,9 +15,7 @@ def separatePassports(data):
         if line == '\n':
             passports.append(passport)
             passport = ''
-
-        passport = passport + line
-
+        passport += line
     passports.append(passport)
     return passports
 
@@ -30,89 +28,84 @@ def parseKeyVals(string):
             keyVals.append(p)
     return keyVals
 
-def checkValid(params):
-    keyVals = params[0]
-    required = params[1]
-    keys = []
-    for kvp in keyVals:
-        keys.append(kvp.split(':')[0])
-
+def containsRequiredKeys(keyVals, keyRules):
+    keys = [kvp.split(':')[0] for kvp in keyVals]
+    required = list(keyRules.keys())
     for rq in required:
         if rq not in keys:
             return False
     return True
 
-def checkValidKeyVal(params):
-    if checkValid(params):
-        keyVals = params[0]
-        ruleSets = params[2]
+def isValidField(keyVals, keyRules):
+    if containsRequiredKeys(keyVals, keyRules):
         for kvp in keyVals:
-            if not parseKeyRules(kvp, ruleSets):
+            if not isValidPassportData(kvp, keyRules):
                 return False
         return True
     return False
 
-def collectValidPassports(passports, params, func):
+def collectValidPassports(passports, keyRules, func):
     validPassports = []
     for passport in passports:
         keyVals = parseKeyVals(passport)
-        args = [keyVals] + params
-        if func(args):
+        if func(keyVals, keyRules):
             validPassports.append([keyVals])
     return validPassports
 
-def checkRule(val, rule):
+def isValidFormat(val, rule):
     return re.match(rule, val)
 
-def checkMinMax(val, minVal, maxVal):
+def isWithinRange(val, minVal, maxVal):
     return val >= minVal and val <= maxVal
 
-def checkRuleMinMax(val, rules):
+def isValidFormatAndRange(val, rules):
     rule = rules[0]
     minVal = rules[1]
     maxVal = rules[2]
-    if checkRule(val, rule):
-        return checkMinMax(int(val), int(minVal), int(maxVal))
+    if isValidFormat(val, rule):
+        return isWithinRange(int(val), int(minVal), int(maxVal))
     return False
 
-def checkHeight(val, rules):
+def isValidHeight(val, rules):
     rule = rules[0]
-    if checkRule(val, rule):
-        unit = val[len(val) - 2:]
+    if isValidFormat(val, rule):
+        unit = val[-2:]
         kr = rules[1]
-        subRules = kr[unit]
-        return checkMinMax(int(val[:len(val) - 2]), int(subRules[0]), int(subRules[1]))
+        subRules = [int(r) for r in kr[unit]]
+        length = int(val[:-2])
+        return isWithinRange(length, subRules[0], subRules[1])
     return False
 
-def parseKeyRules(kvp, kr):
-    key = kvp.split(':')[0]
-    val = kvp.split(':')[1]
-    rs = [i for i in kr if i['key'] == key]
-    if rs:
-        ruleSet = rs[0]['val']
+def isValidPassportData(kvp, kr):
+    kvpParts = kvp.split(':')
+    key = kvpParts[0]
+    val = kvpParts[1]
+    if key == 'cid':
+        return True
+    ruleSet = kr[key]
+    if ruleSet:
         params = ruleSet[0]
         func = ruleSet[1]
         return func(val, params)
     return True
 
-def partOne(passportBatch, required):
+def partOne(passportBatch, kr):
     passports = separatePassports(passportBatch)
-    return len(collectValidPassports(passports, [required], checkValid))
+    return len(collectValidPassports(passports, kr, containsRequiredKeys))
 
-def partTwo(passportBatch, required, kr):
+def partTwo(passportBatch, kr):
     passports = separatePassports(passportBatch)
-    valid = collectValidPassports(passports, [required, kr], checkValidKeyVal)
+    valid = collectValidPassports(passports, kr, isValidField)
     return len(valid)
 
-requiredKeys = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
-keyRules = [{'key': 'byr', 'val': [['^\d{4}$', 1920, 2002], checkRuleMinMax]},
-            {'key': 'iyr', 'val': [['^\d{4}$', 2010, 2020], checkRuleMinMax]},
-            {'key': 'eyr', 'val': [['^\d{4}$', 2020, 2030], checkRuleMinMax]},
-            {'key': 'hgt', 'val': [['^\d{1,3}(cm|in)$', {'cm': [150, 193], 'in': [59, 76]}], checkHeight]},
-            {'key': 'hcl', 'val': ['^#[0-9a-f]{6}$', checkRule]},
-            {'key': 'ecl', 'val': ['^(amb|blu|brn|gry|grn|hzl|oth)$', checkRule]},
-            {'key': 'pid', 'val': ['^\d{9}$', checkRule]}]
+keyRules = {'byr': [['^\d{4}$', 1920, 2002], isValidFormatAndRange],
+            'iyr': [['^\d{4}$', 2010, 2020], isValidFormatAndRange],
+            'eyr': [['^\d{4}$', 2020, 2030], isValidFormatAndRange],
+            'hgt': [['^\d{1,3}(cm|in)$', {'cm': [150, 193], 'in': [59, 76]}], isValidHeight],
+            'hcl': ['^#[0-9a-f]{6}$', isValidFormat],
+            'ecl': ['^(amb|blu|brn|gry|grn|hzl|oth)$', isValidFormat],
+            'pid': ['^\d{9}$', isValidFormat]}
 
-print('Part one: Found %d valid passports!' % partOne(data, requiredKeys))
-print('Part two: Found %d valid passports!' % partTwo(data, requiredKeys, keyRules))
+print('Part one: Found %d valid passports!' % partOne(data, keyRules))
+print('Part two: Found %d valid passports!' % partTwo(data, keyRules))
 

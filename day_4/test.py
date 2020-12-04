@@ -1,6 +1,6 @@
 import unittest
 
-from puzzle import separatePassports, parseKeyVals, checkValid, partOne
+from puzzle import separatePassports, parseKeyVals, containsRequiredKeys, isValidFormatAndRange, isValidHeight, isValidFormat, partOne
 
 
 class TestPuzzle(unittest.TestCase):
@@ -19,7 +19,13 @@ class TestPuzzle(unittest.TestCase):
             'hcl:#cfa07d eyr:2025 pid:166559648\n',
             'iyr:2011 ecl:brn hgt:59in']
 
-    requiredKeys = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
+    keyRules = {'byr': [['^\d{4}$', 1920, 2002], isValidFormatAndRange],
+                'iyr': [['^\d{4}$', 2010, 2020], isValidFormatAndRange],
+                'eyr': [['^\d{4}$', 2020, 2030], isValidFormatAndRange],
+                'hgt': [['^\d{1,3}(cm|in)$', {'cm': [150, 193], 'in': [59, 76]}], isValidHeight],
+                'hcl': ['^#[0-9a-f]{6}$', isValidFormat],
+                'ecl': ['^(amb|blu|brn|gry|grn|hzl|oth)$', isValidFormat],
+                'pid': ['^\d{9}$', isValidFormat]}
 
     def testSeparatePassports(self):
         expectedLen = 4
@@ -33,21 +39,21 @@ class TestPuzzle(unittest.TestCase):
         result = parseKeyVals('ecl:gry pid:860033327 eyr:2020 hcl:#fffffd\nbyr:1937 iyr:2017 cid:147 hgt:183cm\n')
         self.assertEqual(result, expected)
 
-    def testCheckValid_shouldBeValid(self):
+    def testContainsRequiredKeys_shouldBeValid(self):
         keyVals = ['ecl:gry', 'pid:860033327', 'eyr:2020', 'hcl:#fffffd', 'byr:1937', 'iyr:2017', 'cid:147', 'hgt:183cm']
         expected = True
-        isValid = checkValid(keyVals, self.requiredKeys)
+        isValid = containsRequiredKeys(keyVals, self.keyRules)
         self.assertEqual(isValid, expected)
 
-    def testCheckValid_shouldBeInvalid(self):
+    def testContainsRequiredKeys_shouldBeInvalid(self):
         keyVals = ['ecl:gry', 'eyr:2020', 'hcl:#fffffd', 'byr:1937', 'iyr:2017', 'cid:147', 'hgt:183cm']
         expected = False
-        isValid = checkValid(keyVals, self.requiredKeys)
+        isValid = containsRequiredKeys(keyVals, self.keyRules)
         self.assertEqual(isValid, expected)
 
     def testPartOne(self):
         expected = 2
-        result = partOne(self.data, self.requiredKeys)
+        result = partOne(self.data, self.keyRules)
         self.assertEqual(result, expected)
 
 if __name__ == '__main()__':
