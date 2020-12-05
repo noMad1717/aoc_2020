@@ -22,19 +22,11 @@ def computeSeatId(codes):
     return row * 8 + col
 
 def partOne(codesList):
-    maxId = 0
-    for code in codesList:
-        seatId = computeSeatId(code)
-        if seatId > maxId:
-            maxId = seatId
-    return maxId
+    return max([computeSeatId(code) for code in codesList])
 
 def partTwo(codesList):
-    seatIds = []
-    for code in codesList:
-        seatIds.append(computeSeatId(code))
-    seatIds.sort()
-    missingSeatId = [x for x in range(seatIds[0], 975, 1) if x not in seatIds]
+    seatIds = [computeSeatId(code) for code in codesList]
+    missingSeatId = [x for x in range(min(seatIds), max(seatIds)+1, 1) if x not in seatIds]
     return missingSeatId[0]
 
 seatCodes = util.fileToStringList('input')
