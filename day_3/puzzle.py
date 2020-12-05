@@ -1,11 +1,7 @@
 """
     Advent of Code 2020 - Day 3
 """
-treeMap = []
-with open('input') as inputFile:
-    for line in inputFile:
-        line.strip()
-        treeMap.append(line)
+import util
 
 def findTreePos(string):
     treePos = []
@@ -52,6 +48,8 @@ def partTwo(data, slopes):
         foundTrees = countTrees(data, colIncrease, rowIncrease)
         res = res * foundTrees
     return res
+
+treeMap = util.fileToStringList('input')
 
 print('Part one: Collided with %d trees!' % partOne(treeMap))
 print('Part two: Collided with %d trees!' % partTwo(treeMap, [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]))

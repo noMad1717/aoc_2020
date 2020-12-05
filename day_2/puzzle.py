@@ -1,11 +1,7 @@
 """
     Advent of Code 2020 - Day 2
 """
-pwds = []
-with open('input') as inputFile:
-    for line in inputFile:
-        line.strip()
-        pwds.append(line)
+import util
 
 def parseRules(string):
     parts = string.split()
@@ -48,6 +44,8 @@ def partTwo(passwords):
         if (result == True):
             matches = matches + 1
     return matches
+
+pwds = util.fileToStringList('input')
 
 print(str(partOne(pwds)) + " matches!")
 print(str(partTwo(pwds)) + " matches!")

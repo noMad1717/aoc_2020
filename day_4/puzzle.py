@@ -2,11 +2,7 @@
     Advent of Code 2020 - Day 4
 """
 import re
-
-data = []
-with open('input') as inputFile:
-    for line in inputFile:
-        data.append(line)
+import util
 
 def separatePassports(data):
     passports = []
@@ -105,6 +101,8 @@ keyRules = {'byr': [['^\d{4}$', 1920, 2002], isValidFormatAndRange],
             'hcl': ['^#[0-9a-f]{6}$', isValidFormat],
             'ecl': ['^(amb|blu|brn|gry|grn|hzl|oth)$', isValidFormat],
             'pid': ['^\d{9}$', isValidFormat]}
+
+data = util.fileToStringListNoStrip('input')
 
 print('Part one: Found %d valid passports!' % partOne(data, keyRules))
 print('Part two: Found %d valid passports!' % partTwo(data, keyRules))

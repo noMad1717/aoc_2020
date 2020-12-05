@@ -1,10 +1,7 @@
 """
     Advent of Code 2020 - Day 5
 """
-seatCodes = []
-with open('input') as inputFile:
-    for line in inputFile:
-        seatCodes.append(line.strip())
+import util
 
 def findMatch(codes, arr):
     for code in codes: 
@@ -39,6 +36,8 @@ def partTwo(codesList):
     seatIds.sort()
     missingSeatId = [x for x in range(seatIds[0], 975, 1) if x not in seatIds]
     return missingSeatId[0]
+
+seatCodes = util.fileToStringList('input')
 
 print('Part one: Highest seat ID = %d' % partOne(seatCodes))
 print('Part two: Missing seat ID = %d' % partTwo(seatCodes))
