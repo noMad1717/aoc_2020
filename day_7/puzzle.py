@@ -27,24 +27,24 @@ def collectContainers(search, dictionary, bagSet):
             bagSet.add(key)
             collectContainers(key, dictionary, bagSet)
 
-def countContainedBags(search, dictionary):
-    c = sum(dictionary[search].values())
+def countBags(search, dictionary):
+    count = sum(dictionary[search].values())
     for key in dictionary[search].keys():
         amount = dictionary[search][key]
-        c += amount * countContainedBags(key, dictionary)
-    return c
+        count += amount * countBags(key, dictionary)
+    return count
 
 def partOne(data):
     bagDict = parseToDict(data)
-    s = 'shiny gold'
+    bag = 'shiny gold'
     bagSet = set()
-    collectContainers(s, bagDict, bagSet)
+    collectContainers(bag, bagDict, bagSet)
     return len(bagSet)
 
 def partTwo(data):
     bagDict = parseToDict(data)
-    s = 'shiny gold'
-    return countContainedBags(s, bagDict)
+    bag = 'shiny gold'
+    return countBags(bag, bagDict)
 
 bagRules = util.fileToStringList('input')
 
