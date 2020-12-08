@@ -4,53 +4,42 @@
 import util
 
 def parseInstruction(inst):
-    action = inst[:3]
-    op = inst[4]
-    val = int(inst[5:])
-    return action, op, val
+    parts = inst.split()
+    return parts[0], int(parts[1])
 
-def executeInstruction(action, op, val, nextInst, acc):
+def executeInstruction(action, offset, nextInst, acc):
     if action == 'nop':
         return acc, nextInst + 1
     elif action == 'jmp':
-        nextInst = nextInst + val if op == '+' else nextInst - val
-        return acc, nextInst
+        return acc, nextInst + offset
     else:
-        acc = acc + val if op == '+' else acc - val
-        return acc, nextInst + 1
+        return acc + offset, nextInst + 1
 
 def partOne(data):
     executed = []
-    acc = 0
-    nextInst = 0
+    acc = nextInst = 0
     while nextInst not in executed:
         executed.append(nextInst)
-        action, op, val = parseInstruction(data[nextInst])
-        acc, nextInst = executeInstruction(action, op, val, nextInst, acc)
+        action, offset = parseInstruction(data[nextInst])
+        acc, nextInst = executeInstruction(action, offset, nextInst, acc)
     return acc
 
 def partTwo(data):
     executed = []
-    acc = 0
-    prevAcc = acc
-    nextInst = 0
-    prevInst = nextInst
+    acc = prevAcc = nextInst = prevInst = 0
     changed = False
     while nextInst < len(data):
         executed.append(nextInst)
-        action, op, val = parseInstruction(data[nextInst])
+        action, offset = parseInstruction(data[nextInst])
         if action != 'acc' and changed == False:
-            prevAcc = acc
-            prevInst = nextInst
+            prevAcc, prevInst, changed = acc, nextInst, True
             action = 'nop' if action == 'jmp' else 'jmp'
-            changed = True
-        acc, nextInst = executeInstruction(action, op, val, nextInst, acc)
+        acc, nextInst = executeInstruction(action, offset, nextInst, acc)
         if nextInst in executed:
             changed = False
-            i = executed.index(prevInst)
-            executed = executed[0:i]
-            action, op, val = parseInstruction(data[prevInst])
-            acc, nextInst = executeInstruction(action, op, val, prevInst, prevAcc)
+            executed = executed[0:executed.index(prevInst)]
+            action, offset = parseInstruction(data[prevInst])
+            acc, nextInst = executeInstruction(action, offset, prevInst, prevAcc)
     return acc
 
 bootCode = util.fileToStringList('input')
