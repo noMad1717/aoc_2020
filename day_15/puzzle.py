@@ -1,8 +1,6 @@
 """
     Advent of Code 2020 - Day 15
 """
-import util
-
 def getNextNum(num, turn, prev):
     try:
         last = prev[num]
@@ -30,6 +28,8 @@ def partOne(data):
 def partTwo(data):
     return runGame(data, 30000000)
 
-print(f'Part one: Number spoken on turn 2020: {partOne([19, 20, 14, 0, 9, 1])}')
-print(f'Part two: Number spoken on turn 30M: {partTwo([19, 20, 14, 0, 9, 1])}')
+data = [19, 20, 14, 0, 9, 1]
+
+print(f'Part one: Number spoken on turn 2020: {partOne(data)}')
+print(f'Part two: Number spoken on turn 30M: {partTwo(data)}')
 
