@@ -3,65 +3,98 @@
 """
 import util
 
-def getSeatAtPos(row, col, seats):
-    if row < 0 or row > len(seats) - 1 or col < 0 or col > len(seats[0]) - 1:
-        return '.'
-    return seats[row][col]
+def getFloorPoints(data):
+    floor = set()
+    i = 0
+    while i < len(data):
+        row = data[i]
+        j = 0
+        while j < len(row):
+            if row[j] == '.':
+                floor.add((i, j))
+            j += 1
+        i += 1
+    return floor
 
-def getAdjacentSeats(row, col, seats):
-    occupied = 0
-    curRow = row - 1
-    while curRow <= row + 1:
-        curCol = col - 1
-        while curCol <= col + 1:
-            if curRow == row and curCol == col:
-                curCol += 1
-                continue
-            seat = getSeatAtPos(curRow, curCol, seats)
-            if seat == '#': occupied += 1
-            curCol += 1
-        curRow += 1
-    return occupied
+def countAdjacentOccupied(cur, occupiedPoints, floorPoints, data):
+    count = 0
+    checkPoints = set([(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)])
+    for point in checkPoints:
+        check = (cur[0] + point[0], cur[1] + point[1])
+        if check in occupiedPoints:
+            count += 1
+    return count
 
-def runSimulation(seats):
-    updatedSeats = []
-    seatsOccupied = 0
-    r = 0
-    for row in seats:
-        rowSeats = ''
-        c = 0
-        for col in row:
-            if col == '.':
-                rowSeats += col
-                c += 1
+def getSeat(point, floorPoints, occupiedPoints, maxRow, maxCol):
+    if point not in floorPoints:
+        return '#' if point in occupiedPoints else 'L'
+
+def getNextPoint(cur, point, i):
+    yVal = cur[0] + point[0]
+    xVal = cur[1] + point[1]
+    if point[0] != 0:
+        yVal = yVal + i if point[0] > 0 else yVal + -i
+    if point[1] != 0:
+        xVal = xVal + i if point[1] > 0 else xVal + -i
+    return yVal, xVal
+
+def countVisibleOccupied(cur, occupiedPoints, floorPoints, data):
+    checkPoints = set([(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)])
+    seats = dict.fromkeys(checkPoints, None)
+    i = 0
+    while len([x for x in seats.values() if x == None]) > 0:
+        for point in checkPoints:
+            if seats[point] != None:
                 continue
-            occupied = getAdjacentSeats(r, c, seats)
-            if col == 'L':
-                if occupied == 0: 
-                    rowSeats += '#'
-                    seatsOccupied += 1
-                else: 
-                    rowSeats += 'L'
+            yVal, xVal = getNextPoint(cur, point, i)
+            if yVal < 0 or xVal < 0 or yVal > len(data) - 1 or xVal > len(data[0]) - 1:
+                seats[point] = 'OoB'
+                continue
+            seat = getSeat((yVal, xVal), floorPoints, occupiedPoints, len(data) - 1, len(data[0]) - 1)
+            if seat != None:
+                seats[point] = seat
+        i += 1
+    occupiedSeats = [x for x in seats.values() if x == '#']
+    return len(occupiedSeats)
+
+def runSimulation(data, floorPoints, occupiedPoints, maxOccupied, countOccupiedFunc):
+    nextOccupied = set()
+    i = 0
+    while i < len(data):
+        row = data[i]
+        j = 0
+        while j < len(row):
+            cur = (i, j)
+            if cur in floorPoints:
+                j += 1
+                continue
+            elif cur in occupiedPoints:
+                if countOccupiedFunc(cur, occupiedPoints, floorPoints, data) < maxOccupied:
+                    nextOccupied.add(cur)
             else:
-                if occupied >= 4: 
-                    rowSeats += 'L'
-                else: 
-                    rowSeats += '#'
-                    seatsOccupied += 1
-            c += 1
-        r += 1
-        updatedSeats.append(rowSeats)
-    return updatedSeats, seatsOccupied
-                
-def countFinalOccupied(seats):
-    prevRun = []
-    curRun, occupiedSeats = runSimulation(seats)
-    while prevRun != curRun:
-        prevRun = curRun
-        curRun, occupiedSeats = runSimulation(prevRun)
-    return occupiedSeats
+                if countOccupiedFunc(cur, occupiedPoints, floorPoints, data) == 0:
+                    nextOccupied.add(cur)
+            j += 1
+        i += 1
+    return nextOccupied
+
+def run(data, countOccupiedFunc, maxOccupied):
+    floorPoints = getFloorPoints(data)
+    prev = cur = set()
+    cur = runSimulation(data, floorPoints, cur, maxOccupied, countOccupiedFunc)
+    while prev != cur:
+        prev = cur
+        cur = runSimulation(data, floorPoints, cur, maxOccupied, countOccupiedFunc)
+    return len(cur)
+
+def partOne(data):
+    return run(data, countAdjacentOccupied, 4)
+
+def partTwo(data):
+    return run(data, countVisibleOccupied, 5)
 
 seatData = util.fileToStringList('input')
 
-print(f'Part one: {countFinalOccupied(seatData)} occupied seats!')
+print(f'Part one: {partOne(seatData)} occupied seats!')
+print(f'Part two: {partTwo(seatData)} occupied seats!')
 
