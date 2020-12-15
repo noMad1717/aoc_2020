@@ -52,47 +52,41 @@ def applyMask_v2(mask, addr):
         binValArr = [c for c in temp]
     return memAddrs
 
-def executeInstruction(mem, mask, instruction):
+def parseMaskAndInst(mask, instruction):
     mask = mask.split(' = ')[1]
     inst = instruction.split(' = ')[0]
     val = int(instruction.split(' = ')[1])
+    return mask, inst, val
+
+def execValInst(mem, mask, instruction):
+    mask, inst, val = parseMaskAndInst(mask, instruction)
     maskedVal = applyMask(mask, val)
     newInst = f'{inst} = {maskedVal}'
     exec(f'{newInst}')
 
-def executeInstruction_v2(mem, mask, instruction):
-    mask = mask.split(' = ')[1]
-    inst = instruction.split(' = ')[0]
-    val = int(instruction.split(' = ')[1])
+def execAddrInst(mem, mask, instruction):
+    mask, inst, val = parseMaskAndInst(mask, instruction)
     addr = int(inst.split('[')[1][:-1])
     maskedAddrs = applyMask_v2(mask, addr)
     for a in maskedAddrs:
         mem[a] = val
 
-def runInit(mem, data):
+def runInit(mem, data, func):
     mask = ''
     for line in data:
         if line.startswith('mask = '):
             mask = line
         else:
-            executeInstruction(mem, mask, line)
-
-def runInit_v2(mem, data):
-    mask = ''
-    for line in data:
-        if line.startswith('mask = '):
-            mask = line
-        else:
-            executeInstruction_v2(mem, mask, line)
+            func(mem, mask, line)
 
 def partOne(data):
     mem = {}
-    runInit(mem, data)
+    runInit(mem, data, execValInst)
     return sum(mem.values())
 
 def partTwo(data):
     mem = {}
-    runInit_v2(mem, data)
+    runInit(mem, data, execAddrInst)
     return sum(mem.values())
 
 initData = util.fileToStringList('input')

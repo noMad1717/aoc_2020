@@ -1,6 +1,6 @@
 import unittest
 
-from puzzle import applyMask, applyMask_v2, executeInstruction, partOne
+from puzzle import applyMask, applyMask_v2, execValInst, execAddrInst, partOne, partTwo
 
 
 class TestPuzzle(unittest.TestCase):
@@ -18,15 +18,29 @@ class TestPuzzle(unittest.TestCase):
         result = applyMask_v2('000000000000000000000000000000X1001X', 42)
         self.assertEqual(result, expected)
 
-    def testExecuteInstruction(self):
+    def testExecValInst(self):
         expected = 73
-        mem = [0] * 36
-        executeInstruction(mem, self.data[0], self.data[1])
+        mem = {}
+        execValInst(mem, self.data[0], self.data[1])
         self.assertEqual(mem[8], expected)
+
+    def testExecAddrInst(self):
+        expected = 100
+        mem = {}
+        execAddrInst(mem, self.data_v2[0], self.data_v2[1])
+        self.assertEqual(mem[26], expected)
+        self.assertEqual(mem[27], expected)
+        self.assertEqual(mem[58], expected)
+        self.assertEqual(mem[59], expected)
 
     def testPartOne(self):
         expected = 165
         result = partOne(self.data)
+        self.assertEqual(result, expected)
+
+    def testPartTwo(self):
+        expected = 208
+        result = partTwo(self.data_v2)
         self.assertEqual(result, expected)
 
 if __name__ == '__main()__':
