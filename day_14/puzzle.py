@@ -4,7 +4,7 @@
 import util
 
 def toBinaryArray(val, bitLen):
-    binVal = bin(val)[2:].zfill(36)
+    binVal = bin(val)[2:].zfill(bitLen)
     binValArr = [c for c in binVal]
     return binValArr
 
