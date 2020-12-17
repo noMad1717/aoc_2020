@@ -1,6 +1,6 @@
 import unittest
 
-from puzzle import parseInput, findNearestDeparture, parseBusIDs, findEarliest, partOne
+from puzzle import parseInput, findNearestDeparture, parseBusIDs, partOne, partTwo
 
 
 class TestPuzzle(unittest.TestCase):
@@ -29,6 +29,11 @@ class TestPuzzle(unittest.TestCase):
     def testPartOne(self):
         expected = 295
         result = partOne(self.data)
+        self.assertEqual(result, expected)
+    
+    def testPartTwo(self):
+        expected = 1068781
+        result = partTwo(self.data)
         self.assertEqual(result, expected)
 
 
