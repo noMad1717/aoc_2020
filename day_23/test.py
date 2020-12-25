@@ -1,6 +1,6 @@
 import unittest
 
-from puzzle import partOne
+from puzzle import partOne, partTwo
 
 
 class TestPuzzle(unittest.TestCase):
@@ -10,6 +10,11 @@ class TestPuzzle(unittest.TestCase):
     def testPartOne(self):
         expected = '67384529'
         result = partOne(self.data)
+        self.assertEqual(result, expected)
+
+    def testPartTwo(self):
+        expected = 149245887792
+        result = partTwo(self.data)
         self.assertEqual(result, expected)
 
 

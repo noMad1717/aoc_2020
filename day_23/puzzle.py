@@ -3,67 +3,78 @@
 """
 import util
 
-def playCups(moves, cups, isPartTwo):
-    move = 1
-    cupsLen = len(cups)
-    current = cups[0]
-    while move <= moves:
-        currIndex = cups.index(current) + 1
-        pickedUp = []
-        while len(pickedUp) < 3:
-            if currIndex > cupsLen - 1:
-                currIndex = 0
-            cup = cups[currIndex]
-            pickedUp.append(cup)
-            currIndex += 1
-        for cup in pickedUp:
-            cups.remove(cup)
-        destinationCup = None
-        while not destinationCup:
-            cupNo = current - 1
-            while not cupNo in cups:
-                cupNo -= 1
-                if cupNo < min(cups):
-                    cupNo = max(cups)
-            destinationCup = cups[cups.index(cupNo)]
-        nextIndex = cups.index(destinationCup) + 1
-        while len(pickedUp) > 0:
-            cup = pickedUp[0]
-            if nextIndex < cupsLen:
-                cups.insert(nextIndex, cup)
-                nextIndex += 1
-            else:
-                cups.insert(0, cup)
-            pickedUp.remove(cup)
-        if cups.index(current) == cupsLen - 1:
-            current = cups[0]
+def initCups(cupsList, isPartTwo):
+    cups = {}
+    maxLbl = max(cupsList) if not isPartTwo else 1000000
+    for i, cup in enumerate(cupsList):
+        if i == len(cupsList) - 1:
+            lbl = cupsList[0] if not isPartTwo else max(cupsList) + 1
+            cups[cup] = lbl
         else:
-            current = cups[cups.index(current) + 1]
+            cups[cup] = cupsList[i + 1]
+    if isPartTwo:
+        for i in range(max(cupsList) + 1, maxLbl + 1):
+            if i == maxLbl:
+                cups[i] = cupsList[0]
+            else:
+                cups[i] = i + 1
+    return cups, cupsList[0], maxLbl
+
+def pickUp(current, cups):
+    pickedUp = []
+    nextCup = current
+    while len(pickedUp) < 3:
+        pickedUp.append(cups[nextCup])
+        nextCup = cups[nextCup]
+    cups[current] = cups[nextCup]
+    return pickedUp
+
+def setDestination(current, cups, pickedUp, maxLbl):
+    dst = current - 1
+    if dst <= 0:
+        dst = maxLbl
+    while dst in pickedUp:
+        dst -= 1
+        if dst <= 0:
+            dst = maxLbl
+    return dst
+
+def insertPickedUp(cups, pickedUp, dst):
+    oldNext = cups[dst]
+    for i, cup in enumerate(pickedUp):
+        if i == 0:
+            cups[dst] = cup
+        elif i == 2:
+            cups[cup] = oldNext
+
+def playCups(moves, cupsList, isPartTwo):
+    move = 1
+    cups, current, maxLbl = initCups(cupsList, isPartTwo)
+    while move <= moves:
+        pickedUp = pickUp(current, cups)
+        dst = setDestination(current, cups, pickedUp, maxLbl)
+        insertPickedUp(cups, pickedUp, dst)
+        current = cups[current]
         move += 1
     return cups
 
 def partOne(data):
     cups = playCups(100, data, False)
-    onesIndex = cups.index(1)
-    cups = [str(x) for x in cups]
-    right = cups[onesIndex + 1:]
-    left = cups[:onesIndex]
-    return ''.join(right + left)
+    labels = []
+    cur = cups[1]
+    while cur != 1:
+        labels.append(str(cur))
+        cur = cups[cur]
+    return ''.join(labels)
 
 def partTwo(data):
-    cups = playCups(100, data, True)
-    onesIndex = cups.index(1)
-    nextIndex = onesIndex + 1
-    nextCups = []
-    while len(nextCups) < 2:
-        if nextIndex > len(cups) - 1:
-            nextIndex = 0
-        nextCups.append(cups[nextIndex])
-        nextIndex += 1
-    return nextCups[0] * nextCups[1]
+    cups = playCups(10000000, data, True)
+    firstCup = cups[1]
+    secondCup = cups[firstCup]
+    return firstCup * secondCup
 
 puzzleInput = [5,3,8,9,1,4,7,6,2]
 
 print(f'Part one: Labels on the cups after "1": {partOne(puzzleInput)}')
-#print(f'Part two: Product of cup labels immediately clockwise of "1": {partTwo(puzzleInput)}')
+print(f'Part two: Product of cup labels immediately clockwise of "1": {partTwo(puzzleInput)}')
 
