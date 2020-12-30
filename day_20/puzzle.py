@@ -97,26 +97,13 @@ def addToGrid(tileId, x, y, tiles, adjacents, grid, gridTiles):
     adjLeft = borders['lft']
     imgTiles = tiles[tileId]
     while not (adjTop == topId and adjLeft == leftId):
-        if topId != leftId:
-            if adjTop == topId:
-                imgTiles, borders = flipHorizontal(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
-            elif adjLeft == leftId:
-                imgTiles, borders = flipVertical(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
-            else:
-                imgTiles, borders = rotateImg(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
+        if adjTop == topId and (topId != leftId or adjTop != adjLeft):
+            imgTiles, borders = flipHorizontal(imgTiles, borders)
+        elif adjLeft == leftId and (topId != leftId or adjTop != adjLeft):
+            imgTiles, borders = flipVertical(imgTiles, borders)
         else:
-            if adjTop == topId and adjLeft != adjTop:
-                imgTiles, borders = flipHorizontal(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
-            elif adjLeft == leftId and adjLeft != adjTop:
-                imgTiles, borders = flipVertical(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
-            else:
-                imgTiles, borders = rotateImg(imgTiles, borders)
-                adjTop, adjLeft = updateBorders(borders)
+            imgTiles, borders = rotateImg(imgTiles, borders)
+        adjTop, adjLeft = updateBorders(borders)
     adjacents[tileId] = borders
     trimAndMerge(imgTiles, grid, y)
     addTileIdToGrid(tileId, x, y, gridTiles)
